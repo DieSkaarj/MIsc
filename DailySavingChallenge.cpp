@@ -51,11 +51,10 @@ struct compact_date{
 
 /***********************************************************************
  * Func.:	normalise_date
- * Desc.:	Translate to dd/mm.
+ * Desc.:	Translate challenge day to dd/mm.
  **********************************************************************/
  
 compact_date normalise_date( const int dd ){
-
 	int day{ dd },i{0};
 	while( i < 12 ){
 		day-=month[i];
@@ -74,17 +73,14 @@ compact_date normalise_date( const int dd ){
 
 /***********************************************************************
  * Func.:	normalise_date
- * Desc.:	Translate to days' consequtive number.
+ * Desc.:	Translate date to challenge days' consequtive number.
  **********************************************************************/
 
 int normalise_date( const int dd,const int mm ){
-
 	int ma{dd};
 
-	for( int i{0};i<mm;++i ){
-	
+	for( int i{0};i<mm;++i )
 		ma+=month[i];
-	}
 
 	return ma;
 }
