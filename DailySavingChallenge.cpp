@@ -21,23 +21,25 @@
 #include <string>
 
 int calc_amt( const int day,const int total_days ){
+
 	int retval{day},intermediate{day};
 	
 	for( int i{0}; i<total_days; ++i )
 		retval+=(++intermediate);
-	
+
 	return retval;
 }
 
 int main( int argc,char *argv[] ) {
+
 	using std::string;
 
-	/*******************************************************************
-	 * 
-	 * Without values print details on how to use program and exit.
-	 * 
-	 * 
-	 ******************************************************************/
+/***********************************************************************
+ * 
+ * Without values print details on how to use program and exit.
+ * 
+ * 
+ **********************************************************************/
 
 	if( argc < 3 ){
 		std::cout << "Usage: " << argv[0] \
@@ -49,13 +51,13 @@ int main( int argc,char *argv[] ) {
 		str_current		{ argv[1] },
 		str_total		{ argv[2] };
 
-    int \
+	int \
 		current_day		{ std::stoi( str_current ) },
 		days			{ std::stoi( str_total ) },
 		total			{ calc_amt( current_day,days ) },
 		total_overall	{ calc_amt( 0,current_day ) };
 
-		days+=current_day;
+	days+=current_day;
 
 	if( current_day > 365 || days > 365 \
 	|| current_day < 0 || days < 0 ){
@@ -63,14 +65,14 @@ int main( int argc,char *argv[] ) {
 		return EXIT_FAILURE;
 	}
 
-	/*******************************************************************
-	 * 
-	 * Output values to console.
-	 * 
-	 * 
-	 ******************************************************************/
+/***********************************************************************
+ * 
+ * Output values to console.
+ * 
+ * 
+ **********************************************************************/
 
-    std::cout << std::fixed << std::setprecision(2) \
+	std::cout << std::fixed << std::setprecision(2) \
 		<< "\e[0mBetween days \e[0;96m" << current_day \
 		<< "\e[0m and \e[0;96m" << days \
 		<< "\e[0m you will need \e[0;92m£" \
@@ -80,5 +82,5 @@ int main( int argc,char *argv[] ) {
 		<< static_cast< float >( total_overall*0.01 ) \
 		<< "\e[0m saved since day 1!\n";
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
