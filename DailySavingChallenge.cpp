@@ -19,9 +19,9 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cctype>
 
 int calc_amt( const int day,const int total_days ){
-
 	int retval{day},intermediate{day};
 	
 	for( int i{0}; i<total_days; ++i )
@@ -30,16 +30,20 @@ int calc_amt( const int day,const int total_days ){
 	return retval;
 }
 
-int main( int argc,char *argv[] ) {
+int is_number( std::string& value ){
 
+	for( auto character: value )
+		if( !std::isdigit( character ) ) return EXIT_FAILURE;
+	
+	return EXIT_SUCCESS;
+}
+
+int main( int argc,char *argv[] ) {
 	using std::string;
 
-/***********************************************************************
- * 
- * Without values print details on how to use program and exit.
- * 
- * 
- **********************************************************************/
+	/***************************************************************
+	 * Without values print details on how to use program and exit.
+	 **************************************************************/
 
 	if( argc < 3 ){
 		std::cout << "Usage: " << argv[0] \
@@ -48,16 +52,34 @@ int main( int argc,char *argv[] ) {
 	}
 
 	string \
-		str_current		{ argv[1] },
-		str_total		{ argv[2] };
+	str_current	{ argv[1] },
+	str_total	{ argv[2] };
+
+	/***************************************************************
+	 * Check that user has used numerals.
+	 **************************************************************/
+
+	if( is_number( str_current ) || is_number( str_total ) ){
+		std::cout << "Error: values must be type integer.\n";
+		return EXIT_FAILURE;
+	}
 
 	int \
-		current_day		{ std::stoi( str_current ) },
-		days			{ std::stoi( str_total ) },
-		total			{ calc_amt( current_day,days ) },
-		total_overall	{ calc_amt( 0,current_day ) };
+	current_day	{ std::stoi( str_current ) },
+	days		{ std::stoi( str_total ) },
+	total		{ calc_amt( current_day,days ) },
+	total_overall	{ calc_amt( 0,current_day ) };
+
+	/***************************************************************
+	 * Reuse days var. for checking final day value.
+	 **************************************************************/
 
 	days+=current_day;
+
+	/***************************************************************
+	 * The challenge doesn't go on for more than a year;
+	 * check dates will align.
+	 **************************************************************/
 
 	if( current_day > 365 || days > 365 \
 	|| current_day < 0 || days < 0 ){
@@ -65,12 +87,9 @@ int main( int argc,char *argv[] ) {
 		return EXIT_FAILURE;
 	}
 
-/***********************************************************************
- * 
- * Output values to console.
- * 
- * 
- **********************************************************************/
+	/***************************************************************
+	 * Output values to console.
+	 **************************************************************/
 
 	std::cout << std::fixed << std::setprecision(2) \
 		<< "\e[0mBetween days \e[0;96m" << current_day \
