@@ -21,7 +21,119 @@
 #include <string>
 #include <cctype>
 
-#define ABSOLUTE_ARGS 3 
+#define ABSOLUTE_ARGS 3
+
+#ifndef START_DAY
+	#define START_DAY 0
+#endif
+#ifndef START_MONTH
+	#define START_MONTH 0
+#endif
+
+constexpr int month[12]{
+	31,	/* Jan */
+	28,	/* Feb */
+	31,	/* Mar */
+	30,	/* Apr */
+	31,	/* May */
+	30,	/* Jun */
+	31,	/* Jul */
+	31,	/* Aug */
+	30,	/* Sep */
+	31,	/* Oct */
+	30,	/* Nov */
+	31	/* Dec */
+};
+
+struct compact_date{
+	int dd,mm;
+};
+
+/***********************************************************************
+ * Func.:	normalise_date
+ * Desc.:	Translate to dd/mm.
+ **********************************************************************/
+ 
+compact_date normalise_date( const int dd ){
+
+	int day{ dd },i{0};
+	while( i < 12 ){
+		day-=month[i];
+		if( day <= month[i++] ) break;
+	}
+
+	/***************************************************************
+	 * Offset 'i' (month) to account for 0-index array and round
+	 * to nearest month if greater than December.
+	 **************************************************************/
+
+	i=(i++)>12?i-12:i;
+
+	return compact_date{ day,i };
+}
+
+/***********************************************************************
+ * Func.:	normalise_date
+ * Desc.:	Translate to days' consequtive number.
+ **********************************************************************/
+
+int normalise_date( const int dd,const int mm ){
+
+	int ma{dd};
+
+	for( int i{0};i<mm;++i ){
+	
+		ma+=month[i];
+	}
+
+	return ma;
+}
+
+/***********************************************************************
+ * Func.:	get_month_name
+ * Desc.:	Get month name from integer value.
+ **********************************************************************/
+
+std::string get_month_name( const int mm ){
+	switch( mm ){
+		case 1: return "January";
+		case 2: return "February";
+		case 3: return "March";
+		case 4: return "April";
+		case 5: return "May";
+		case 6: return "June";
+		case 7: return "July";
+		case 8: return "August";
+		case 9: return "September";
+		case 10: return "October";
+		case 11: return "November";
+		case 12: return "December";
+	}
+	
+	return "Undecimber";
+}
+
+/***********************************************************************
+ * Func.:	get_day_part
+ * Desc.:	Find days' ordinal suffix.
+ **********************************************************************/
+
+std::string get_day_part( const int dd ){
+	switch( dd ){
+		case 1:
+		case 21:
+		case 31:
+			return "st";
+		case 2:
+		case 22:
+			return "nd";
+		case 3:
+		case 23:
+			return "rd";
+	}
+	
+	return "th";
+}
 
 /***********************************************************************
  * Func.:	calc_amt
@@ -105,16 +217,22 @@ int main( int argc,char *argv[] ) {
 	 * Output values to console.
 	 **************************************************************/
 
+	int		start_day{ normalise_date( START_DAY,START_MONTH ) };
+	compact_date	ddmm{ normalise_date( days+start_day ) },
+			cddmm{ normalise_date( current_day+start_day ) };
+
 	std::cout << std::fixed << std::setprecision( 2 ) \
-		<< "\e[0mBetween days \e[0;96m" << current_day \
-		<< "\e[0m and \e[0;96m" << days \
+		<< "\e[0mBetween \e[0;96m" \
+		<< cddmm.dd << get_day_part( cddmm.dd ) << " " \
+		<< get_month_name( cddmm.mm ) << "\e[0m and \e[0;96m" \
+		<< ddmm.dd << get_day_part( ddmm.dd ) \
+		<< " " << get_month_name( ddmm.mm ) << "\e[0;96m" \
 		<< "\e[0m you will need \e[0;92m£" \
 		<< static_cast< float >( total*0.01 ) \
 		<< "\e[0m in your current account.\n" \
 		<< "Giving you a total of \e[0;97m\e[42m £" \
 		<< static_cast< float >( total_overall*0.01 ) \
-		<< " \e[0m saved between day \e[0;96m1\e[0m and day \e[0;96m" \
-		<< days << "\e[0m!\n";
+		<< " \e[0m saved altogether!\n";
 
 	return EXIT_SUCCESS;
 }
