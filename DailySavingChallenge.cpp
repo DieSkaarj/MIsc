@@ -105,15 +105,16 @@ int main( int argc,char *argv[] ) {
 	 * Output values to console.
 	 **************************************************************/
 
-	std::cout << std::fixed << std::setprecision(2) \
+	std::cout << std::fixed << std::setprecision( 2 ) \
 		<< "\e[0mBetween days \e[0;96m" << current_day \
 		<< "\e[0m and \e[0;96m" << days \
 		<< "\e[0m you will need \e[0;92m£" \
 		<< static_cast< float >( total*0.01 ) \
 		<< "\e[0m in your current account.\n" \
-		<< "Giving you a total of \e[0;95m£" \
+		<< "Giving you a total of \e[0;97m\e[42m £" \
 		<< static_cast< float >( total_overall*0.01 ) \
-		<< "\e[0m saved since day 1!\n";
+		<< " \e[0m saved between day \e[0;96m1\e[0m and day \e[0;96m" \
+		<< days << "\e[0m!\n";
 
 	return EXIT_SUCCESS;
 }
