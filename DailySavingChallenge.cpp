@@ -80,17 +80,15 @@ int main( int argc,char *argv[] ) {
 		return EXIT_FAILURE;
 	}
 
-	int \
-	current_day	{ std::stoi( str_current ) },
-	days		{ std::stoi( str_total ) },
-	total		{ calc_amt( current_day,days ) },
-	total_overall	{ calc_amt( 0,current_day ) };
-
 	/***************************************************************
 	 * Reuse days var. for checking final day value.
 	 **************************************************************/
 
-	days+=current_day;
+	int \
+	current_day	{ std::stoi( str_current ) },
+	days		{ std::stoi( str_total ) },
+	total		{ calc_amt( current_day,days ) },
+	total_overall	{ calc_amt( 0,( days+=current_day ) ) };
 
 	/***************************************************************
 	 * The challenge doesn't go on for more than a year;
