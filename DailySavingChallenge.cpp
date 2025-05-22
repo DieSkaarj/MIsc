@@ -31,7 +31,6 @@ int calc_amt( const int day,const int total_days ){
 }
 
 int is_number( std::string& value ){
-
 	for( auto character: value )
 		if( !std::isdigit( character ) ) return EXIT_FAILURE;
 	
