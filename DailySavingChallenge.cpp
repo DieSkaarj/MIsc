@@ -23,6 +23,11 @@
 
 #define ABSOLUTE_ARGS 3 
 
+/***********************************************************************
+ * Func.:	calc_amt
+ * Desc.:	Calculate o(2n+1)
+ **********************************************************************/
+
 int calc_amt( const int day,const int total_days ){
 	int retval{day},intermediate{day};
 	
@@ -32,6 +37,11 @@ int calc_amt( const int day,const int total_days ){
 	return retval;
 }
 
+/***********************************************************************
+ * Func.:	is_number
+ * Desc.:	Is every char in numerical range?
+ **********************************************************************/
+ 
 int is_number( std::string& value ){
 	for( auto character: value )
 		if( !std::isdigit( character ) ) return EXIT_FAILURE;
@@ -39,6 +49,10 @@ int is_number( std::string& value ){
 	return EXIT_SUCCESS;
 }
 
+/***********************************************************************
+ * Hangar.
+ **********************************************************************/
+ 
 int main( int argc,char *argv[] ) {
 	using std::string;
 
