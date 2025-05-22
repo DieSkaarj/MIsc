@@ -21,6 +21,8 @@
 #include <string>
 #include <cctype>
 
+#define ABSOLUTE_ARGS 3 
+
 int calc_amt( const int day,const int total_days ){
 	int retval{day},intermediate{day};
 	
@@ -44,7 +46,7 @@ int main( int argc,char *argv[] ) {
 	 * Without values print details on how to use program and exit.
 	 **************************************************************/
 
-	if( argc < 3 ){
+	if( argc < ABSOLUTE_ARGS ){
 		std::cout << "Usage: " << argv[0] \
 			<< " <challenge-day> <number-of-days>\n";
 		return EXIT_FAILURE;
@@ -58,7 +60,8 @@ int main( int argc,char *argv[] ) {
 	 * Check that user has used numerals.
 	 **************************************************************/
 
-	if( is_number( str_current ) || is_number( str_total ) ){
+	if( EXIT_FAILURE \
+	==( is_number( str_current ) || is_number( str_total ) ) ){
 		std::cout << "Error: values must be type integer.\n";
 		return EXIT_FAILURE;
 	}
