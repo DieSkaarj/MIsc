@@ -32,7 +32,11 @@
 
 constexpr int month[12]{
 	31,	/* Jan */
-	28,	/* Feb */
+#ifdef LEAP_YEAR
+	29,	/* Feb (Leap Year) */
+#else
+	28,	/* Feb (Non-leap Year) */
+#endif
 	31,	/* Mar */
 	30,	/* Apr */
 	31,	/* May */
@@ -78,12 +82,12 @@ compact_date normalise_date( const int dd ){
  **********************************************************************/
 
 int normalise_date( const int dd,const int mm ){
-	int ma{dd};
+	int day_no{dd};
 
 	for( int i{0};i<mm;++i )
-		ma+=month[i];
+		day_no+=month[i];
 
-	return ma;
+	return day_no;
 }
 
 /***********************************************************************
@@ -210,13 +214,13 @@ int main( int argc,char *argv[] ) {
 		return EXIT_FAILURE;
 	}
 
-	/***************************************************************
-	 * Output values to console.
-	 **************************************************************/
-
 	int		start_day{ normalise_date( START_DAY,START_MONTH ) };
 	compact_date	ddmm{ normalise_date( days+start_day ) },
 			cddmm{ normalise_date( current_day+start_day ) };
+
+	/***************************************************************
+	 * Output values to console.
+	 **************************************************************/
 
 	std::cout << std::fixed << std::setprecision( 2 ) \
 		<< "\e[0mBetween \e[0;96m" \
