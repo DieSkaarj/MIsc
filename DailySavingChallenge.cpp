@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <string>
 #include <cctype>
+#include <ctime>
 
 #define ABSOLUTE_ARGS 3
 
@@ -30,13 +31,13 @@
 	#define START_MONTH 0
 #endif
 
-constexpr int month[12]{
+enum MONTH{
+	JAN=0,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+};
+
+int month[12]{
 	31,	/* Jan */
-#ifdef LEAP_YEAR
-	29,	/* Feb (Leap Year) */
-#else
 	28,	/* Feb (Non-leap Year) */
-#endif
 	31,	/* Mar */
 	30,	/* Apr */
 	31,	/* May */
@@ -54,13 +55,38 @@ struct compact_date{
 };
 
 /***********************************************************************
+ * Func.:	get_current_year
+ * Desc.:	Get current year from system
+ **********************************************************************/
+ 
+int get_current_year(){
+	std::time_t timestamp{ std::time( nullptr) };
+	struct tm datetime = *localtime(&timestamp);
+
+	return datetime.tm_year+1900;
+}
+
+/***********************************************************************
+ * Func.:	is_leap_year
+ * Desc.:	Adjust months if challenge is over a leap year.
+ **********************************************************************/
+
+int is_leap_year( int year ){
+	if( !( ( year % 4 ) && (year % 100 ) )
+	|| !( ( year % 100 ) && (year % 400 ) ) ) return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+/***********************************************************************
  * Func.:	normalise_date
  * Desc.:	Translate challenge day to dd/mm.
  **********************************************************************/
  
 compact_date normalise_date( const int dd ){
 	int day{ dd },i{0};
-	while( i < 13 ){
+
+	while( i < 12 ){
 		if( day <= month[i] ) break;
 		else day-=month[i];
 		++i;
@@ -71,9 +97,9 @@ compact_date normalise_date( const int dd ){
 	 * to nearest month if greater than December.
 	 **************************************************************/
 
-	i=(i++)>12?i-12:i;
+	++i;
 
-	return compact_date{ day,i };
+	return compact_date{ day,( i>12 )?i-12:i };
 }
 
 /***********************************************************************
@@ -200,23 +226,31 @@ int main( int argc,char *argv[] ) {
 	int \
 	current_day	{ std::stoi( str_current ) },
 	days		{ std::stoi( str_total ) },
+	total_days	{ days+current_day },
 	total		{ calc_amt( current_day,days ) },
-	total_overall	{ calc_amt( 0,( days+=current_day ) ) };
+	total_overall	{ calc_amt( 0,( total_days ) ) };
 
 	/***************************************************************
 	 * The challenge doesn't go on for more than a year;
 	 * check dates will align.
 	 **************************************************************/
 
-	if( current_day > 365 || days > 365 \
-	|| current_day < 0 || days < 0 ){
+	if( current_day > 365 || total_days > 365 \
+	|| current_day < 0 || total_days < 0 ){
 		std::cout << "Error: days cannot exceed a year.\n";
 		return EXIT_FAILURE;
 	}
 
-	int		start_day{ normalise_date( START_DAY,START_MONTH ) };
-	compact_date	ddmm{ normalise_date( days+start_day ) },
-			cddmm{ normalise_date( current_day+start_day ) };
+	if( is_leap_year( get_current_year() ) 
+	|| 1+is_leap_year( get_current_year() ) ) 
+		++month[FEB];
+
+	int \
+	start_day{ normalise_date( START_DAY,START_MONTH ) };
+
+	const compact_date \
+	ddmm{ normalise_date( total_days+start_day ) },
+	cddmm{ normalise_date( current_day+start_day ) };
 
 	/***************************************************************
 	 * Output values to console.
