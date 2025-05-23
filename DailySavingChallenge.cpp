@@ -56,9 +56,10 @@ struct compact_date{
  
 compact_date normalise_date( const int dd ){
 	int day{ dd },i{0};
-	while( i < 12 ){
-		day-=month[i];
-		if( day <= month[i++] ) break;
+	while( i < 13 ){
+		if( day <= month[i] ) break;
+		else day-=month[i];
+		++i;
 	}
 
 	/***************************************************************
