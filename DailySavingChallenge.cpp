@@ -232,6 +232,11 @@ int calc_amt( const int day,const int total_days ){
 	return retval;
 }
 
+/***********************************************************************
+ * Func.:	get_arg
+ * Desc.:	Find arguement number.
+ **********************************************************************/
+
 int get_arg( int &argc, char *argv[],std::string strv ){
 	for( int i{ 0 };i<argc; ++i ){
 		if( std::string( argv[ i ] )==strv ) return i;
@@ -252,6 +257,11 @@ int is_number( std::string& value ){
 	return EXIT_SUCCESS;
 }
 
+/***********************************************************************
+ * Func.:	is_date
+ * Desc.:	Check string is valid date format.
+ **********************************************************************/
+ 
 int is_date( std::string& value ){
 	compact_date tdate{ normalise_date( value ) };
 
@@ -387,17 +397,20 @@ int main( int argc,char *argv[] ) {
 	current_day+=start_day;
 
 	/***************************************************************
-	 * Check and adjust dates for leap years.
+	 * Check and adjust dates and duration for leap years.
 	 **************************************************************/
 
 	const int leap_day{ normalise_date( 29,FEB ) };
 
-	if( ( ( current_day<leap_day && total_days>leap_day ) \
-	&& is_leap_year( get_current_year() ) )
-	|| ( ( current_day>=leap_day && total_days>leap_day ) \
-	&& is_leap_year( get_current_year()+1 ) ) ){
-		++month[ FEB ];
+	if( current_day<leap_day && total_days>leap_day \
+	&& is_leap_year( get_current_year() ) ){
 		++duration;
+		++month[ FEB ];
+	}
+
+	if( current_day>=leap_day && total_days>leap_day \
+	&& is_leap_year( get_current_year()+1 ) ){
+		++month[ FEB ];
 	}
 
 	const compact_date \
