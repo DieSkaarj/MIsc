@@ -21,6 +21,7 @@
 #include <string>
 #include <cctype>
 #include <ctime>
+#include <cstdint>
 
 #define ABSOLUTE_ARGS 3
 
@@ -32,7 +33,7 @@
 #endif
 
 enum MONTH{
-	JAN=0,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+	JAN=0,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC,UND
 };
 
 int month[12]{
@@ -51,7 +52,8 @@ int month[12]{
 };
 
 struct compact_date{
-	int dd,mm;
+	int dd;
+	int mm;
 };
 
 /***********************************************************************
@@ -82,7 +84,7 @@ int is_leap_year( int year ){
  * Func.:	normalise_date
  * Desc.:	Translate challenge day to dd/mm.
  **********************************************************************/
- 
+
 compact_date normalise_date( const int dd ){
 	int day{ dd },i{0};
 
@@ -98,9 +100,7 @@ compact_date normalise_date( const int dd ){
 	 * to nearest month if greater than December.
 	 **************************************************************/
 
-	++i;
-
-	return compact_date{ day,( i>12 )?i-12:i };
+	return compact_date{ day,++i };
 }
 
 /***********************************************************************
@@ -118,11 +118,25 @@ int normalise_date( const int dd,const int mm ){
 }
 
 /***********************************************************************
- * Func.:	get_month_name
+ * Func.:	normalise_date
+ * Desc.:	Translate date to challenge days' consequtive number.
+ **********************************************************************/
+
+int normalise_date( const compact_date date ){
+	int day_no{date.dd};
+
+	for( int i{0};i<date.mm;++i )
+		day_no+=month[i];
+
+	return day_no;
+}
+
+/***********************************************************************
+ * Func.:	get_month
  * Desc.:	Get month name from integer value.
  **********************************************************************/
 
-std::string get_month_name( const int mm ){
+std::string get_month( const int mm ){
 	switch( mm ){
 		case 1: return "January";
 		case 2: return "February";
@@ -139,6 +153,28 @@ std::string get_month_name( const int mm ){
 	}
 	
 	return "Undecimber";
+}
+
+/***********************************************************************
+ * Func.:	get_month
+ * Desc.:	Get month enum from string value.
+ **********************************************************************/
+
+MONTH get_month( const std::string mn ){
+	if( "JAN" == mn ) return JAN;
+	if( "FEB" == mn ) return FEB;
+	if( "MAR" == mn ) return MAR;
+	if( "APR" == mn ) return APR;
+	if( "MAY" == mn ) return MAY;
+	if( "JUN" == mn ) return JUN;
+	if( "JUL" == mn ) return JUL;
+	if( "AUG" == mn ) return AUG;
+	if( "SEP" == mn ) return SEP;
+	if( "OCT" == mn ) return OCT;
+	if( "NOV" == mn ) return NOV;
+	if( "DEC" == mn ) return DEC;
+
+	return UND;
 }
 
 /***********************************************************************
@@ -164,6 +200,25 @@ std::string get_day_part( const int dd ){
 }
 
 /***********************************************************************
+ * Func.:	normalise_date
+ * Desc.:	Translate date to challenge days' consequtive number.
+ **********************************************************************/
+
+compact_date normalise_date( std::string str ){
+	if( str.size() < 4 || str.size() > 5 ) return compact_date{ 0,UND };
+
+	std::string d{ str.substr( 0,str.length()-3 ) };
+	std::string m{ str.substr( str.length()-3,str.length() ) };
+
+	int mi{ get_month( m ) };
+	int di{ std::stoi( d ) };
+
+	if( di > month[ mi ] ) return compact_date{ 0,UND };
+
+	return compact_date{ di,mi };
+}
+
+/***********************************************************************
  * Func.:	calc_amt
  * Desc.:	Calculate o(2n+1)
  **********************************************************************/
@@ -177,6 +232,14 @@ int calc_amt( const int day,const int total_days ){
 	return retval;
 }
 
+int get_arg( int &argc, char *argv[],std::string strv ){
+	for( int i{ 0 };i<argc; ++i ){
+		if( std::string( argv[ i ] )==strv ) return i;
+	}
+	
+	return EXIT_SUCCESS;
+}
+
 /***********************************************************************
  * Func.:	is_number
  * Desc.:	Is every char in numerical range?
@@ -187,6 +250,40 @@ int is_number( std::string& value ){
 		if( !std::isdigit( character ) ) return EXIT_FAILURE;
 	
 	return EXIT_SUCCESS;
+}
+
+int is_date( std::string& value ){
+	compact_date tdate{ normalise_date( value ) };
+
+	if( tdate.mm==UND ) return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+/***********************************************************************
+ * Func.:	as_currency
+ * Desc.:	Format integer to currency and return as text.
+ **********************************************************************/
+ 
+std::string as_currency( int v ){
+	std::stringstream retstr;
+	retstr << std::fixed << std::setprecision( 2 ) \
+	<< static_cast< float >( v*0.01 );
+
+	return retstr.str();
+}
+
+/***********************************************************************
+ * Func.:	as_written_date
+ * Desc.:	Format compact_date type to written date.
+ **********************************************************************/
+ 
+std::string as_written_date( compact_date v ){
+	std::stringstream retstr;
+	retstr << v.dd << get_day_part( v.dd ) << ' ' \
+	<< get_month( v.mm );
+
+	return retstr.str();
 }
 
 /***********************************************************************
@@ -202,7 +299,13 @@ int main( int argc,char *argv[] ) {
 
 	if( argc < ABSOLUTE_ARGS ){
 		std::cout << "Usage: " << argv[0] \
-			<< " <challenge-day> <number-of-days>\n";
+			<< " <challenge-day> <number-of-days>\n" \
+			<< "Parameters can be either: \n"
+			<< "Integral where the first parameter is " \
+			<< "the first number of days and the second " \
+			<< "how many days you want to calculate." \
+			<< "Or, presented as a date format DDMMM " \
+			<< "e.g 26JAN.\n";
 		return EXIT_FAILURE;
 	}
 
@@ -210,33 +313,63 @@ int main( int argc,char *argv[] ) {
 	str_current	{ argv[1] },
 	str_total	{ argv[2] };
 
+	int \
+	current_day,
+	duration;
+
 	/***************************************************************
-	 * Check that user has used numerals.
+	 * Validate first passed argument.
 	 **************************************************************/
 
-	if( EXIT_FAILURE \
-	==( is_number( str_current ) || is_number( str_total ) ) ){
-		std::cout << "Error: values must be type integer.\n";
+	if( EXIT_SUCCESS==is_number( str_current ) ){
+		current_day=std::stoi( str_current );
+		std::cout << current_day << '\n';
+	}
+	else
+	if( EXIT_SUCCESS==is_date( str_current ) ){
+		current_day=normalise_date( normalise_date( str_current ) );
+		current_day-=START_DAY;
+	}
+	else{
+		std::cout << "Error: incompatible date type on 1st param.\n";
 		return EXIT_FAILURE;
 	}
+
+	/***************************************************************
+	 * Validate second passed argument.
+	 **************************************************************/
+
+	if( EXIT_SUCCESS==is_number( str_total ) )
+		duration=std::stoi( str_total );
+	else
+	if( EXIT_SUCCESS==is_date( str_total ) ){
+		duration=normalise_date( normalise_date( str_total ) );
+		duration-=current_day+START_DAY;
+	}
+	else{
+		std::cout << "Error: incompatible date type on 2nd param.\n";
+		return EXIT_FAILURE;
+	}
+
+	int year_length{ 365+is_leap_year( get_current_year() ) };
+
+	if( duration < 0 ) duration+=year_length;
 
 	/***************************************************************
 	 * Reuse days var. for checking final day value.
 	 **************************************************************/
 
 	int \
-	current_day	{ std::stoi( str_current ) },
-	days		{ std::stoi( str_total ) },
-	total_days	{ days+current_day },
-	total		{ calc_amt( current_day,days ) },
-	total_overall	{ calc_amt( 0,( total_days ) ) };
+	total_days	{ duration+current_day },
+	total		{ calc_amt( current_day+1,duration ) },
+	total_overall	{ calc_amt( 1,( total_days ) ) };
 
 	/***************************************************************
 	 * The challenge doesn't go on for more than a year;
 	 * check dates will align.
 	 **************************************************************/
 
-	if( current_day > 365 || total_days > 365 \
+	if( current_day > year_length || total_days > year_length \
 	|| current_day < 0 || total_days < 0 ){
 		std::cout << "Error: days cannot exceed a year.\n";
 		return EXIT_FAILURE;
@@ -262,8 +395,10 @@ int main( int argc,char *argv[] ) {
 	if( ( ( current_day<leap_day && total_days>leap_day ) \
 	&& is_leap_year( get_current_year() ) )
 	|| ( ( current_day>=leap_day && total_days>leap_day ) \
-	&& is_leap_year( get_current_year()+1 ) ) )
+	&& is_leap_year( get_current_year()+1 ) ) ){
 		++month[ FEB ];
+		++duration;
+	}
 
 	const compact_date \
 	ddmm{ normalise_date( total_days ) },
@@ -273,17 +408,14 @@ int main( int argc,char *argv[] ) {
 	 * Output values to console.
 	 **************************************************************/
 
-	std::cout << std::fixed << std::setprecision( 2 ) \
-		<< "\e[0mBetween \e[0;96m" \
-		<< cddmm.dd << get_day_part( cddmm.dd ) << " " \
-		<< get_month_name( cddmm.mm ) << "\e[0m and \e[0;96m" \
-		<< ddmm.dd << get_day_part( ddmm.dd ) \
-		<< " " << get_month_name( ddmm.mm ) << "\e[0;96m" \
+	std::cout << "\e[0mBetween \e[0;96m" \
+		<< as_written_date( cddmm ) << "\e[0m and \e[0;96m" \
+		<< as_written_date( ddmm ) << "\e[0;96m" \
 		<< "\e[0m you will need \e[0;92m£" \
-		<< static_cast< float >( total*0.01 ) \
+		<< as_currency( total ) \
 		<< "\e[0m in your current account.\n" \
 		<< "Giving you a total of \e[0;97m\e[42m £" \
-		<< static_cast< float >( total_overall*0.01 ) \
+		<< as_currency( total_overall ) \
 		<< " \e[0m saved altogether!\n";
 
 	return EXIT_SUCCESS;
