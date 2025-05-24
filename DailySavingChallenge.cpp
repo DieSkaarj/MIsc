@@ -61,7 +61,7 @@ struct compact_date{
  
 int get_current_year(){
 	std::time_t timestamp{ std::time( nullptr) };
-	struct tm datetime = *localtime(&timestamp);
+	struct tm datetime = *localtime( &timestamp );
 
 	return datetime.tm_year+1900;
 }
@@ -86,10 +86,11 @@ int is_leap_year( int year ){
 compact_date normalise_date( const int dd ){
 	int day{ dd },i{0};
 
-	while( i < 12 ){
+	while( day > month[ i ] ){
 		if( day <= month[i] ) break;
 		else day-=month[i];
-		++i;
+
+		i=i>=DEC?JAN:++i;
 	}
 
 	/***************************************************************
@@ -241,16 +242,32 @@ int main( int argc,char *argv[] ) {
 		return EXIT_FAILURE;
 	}
 
-	if( is_leap_year( get_current_year() ) 
-	|| 1+is_leap_year( get_current_year() ) ) 
-		++month[FEB];
+	/***************************************************************
+	 * Align dates by offsetting the challenge days with a beginning
+	 * date (use a timeline.)
+	 **************************************************************/
 
 	int \
 	start_day{ normalise_date( START_DAY,START_MONTH ) };
 
+	total_days+=start_day;
+	current_day+=start_day;
+
+	/***************************************************************
+	 * Check and adjust dates for leap years.
+	 **************************************************************/
+
+	const int leap_day{ normalise_date( 29,FEB ) };
+
+	if( ( ( current_day<leap_day && total_days>leap_day ) \
+	&& is_leap_year( get_current_year() ) )
+	|| ( ( current_day>=leap_day && total_days>leap_day ) \
+	&& is_leap_year( get_current_year()+1 ) ) )
+		++month[ FEB ];
+
 	const compact_date \
-	ddmm{ normalise_date( total_days+start_day ) },
-	cddmm{ normalise_date( current_day+start_day ) };
+	ddmm{ normalise_date( total_days ) },
+	cddmm{ normalise_date( current_day ) };
 
 	/***************************************************************
 	 * Output values to console.
