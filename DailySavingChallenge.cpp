@@ -225,9 +225,10 @@ compact_date normalise_date( std::string str ){
 
 int calc_amt( const int day,const int total_days ){
 	int retval{day},intermediate{day};
-	
-	for( int i{0}; i<total_days; ++i )
+
+	for( int i{0}; i<total_days; ++i ){
 		retval+=(++intermediate);
+	}
 
 	return retval;
 }
@@ -327,18 +328,24 @@ int main( int argc,char *argv[] ) {
 	current_day,
 	duration;
 
+	const int year_length{ 365+is_leap_year( get_current_year() ) };
+	const int \
+	start_day{ normalise_date( START_DAY,START_MONTH ) };
+
+
 	/***************************************************************
 	 * Validate first passed argument.
 	 **************************************************************/
 
 	if( EXIT_SUCCESS==is_number( str_current ) ){
 		current_day=std::stoi( str_current );
-		std::cout << current_day << '\n';
 	}
 	else
 	if( EXIT_SUCCESS==is_date( str_current ) ){
 		current_day=normalise_date( normalise_date( str_current ) );
 		current_day-=START_DAY;
+
+		if( current_day < 0 ) current_day+=year_length;
 	}
 	else{
 		std::cout << "Error: incompatible date type on 1st param.\n";
@@ -361,8 +368,6 @@ int main( int argc,char *argv[] ) {
 		return EXIT_FAILURE;
 	}
 
-	int year_length{ 365+is_leap_year( get_current_year() ) };
-
 	if( duration < 0 ) duration+=year_length;
 
 	/***************************************************************
@@ -370,7 +375,7 @@ int main( int argc,char *argv[] ) {
 	 **************************************************************/
 
 	int \
-	total_days	{ duration+current_day },
+	total_days	{ current_day+duration },
 	total		{ calc_amt( current_day+1,duration ) },
 	total_overall	{ calc_amt( 1,( total_days ) ) };
 
@@ -379,7 +384,7 @@ int main( int argc,char *argv[] ) {
 	 * check dates will align.
 	 **************************************************************/
 
-	if( current_day > year_length || total_days > year_length \
+	if( current_day >= year_length || total_days >= year_length \
 	|| current_day < 0 || total_days < 0 ){
 		std::cout << "Error: days cannot exceed a year.\n";
 		return EXIT_FAILURE;
@@ -389,9 +394,6 @@ int main( int argc,char *argv[] ) {
 	 * Align dates by offsetting the challenge days with a beginning
 	 * date (use a timeline.)
 	 **************************************************************/
-
-	int \
-	start_day{ normalise_date( START_DAY,START_MONTH ) };
 
 	total_days+=start_day;
 	current_day+=start_day;
